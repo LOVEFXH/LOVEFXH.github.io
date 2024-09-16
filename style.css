@@ -89,10 +89,19 @@
 }
 .navigation u1 li:nth-child(6n+5) a:before
 {
-    background: #fd79a8;
+    background: #ffeaa7;
 }
 .navigation u1 li:nth-child(6n+6) a:before
 {
-    background: #ffeaa7;
+    background: #fd79a8;
 }
 
+/* ---------------响应式布局---------------- */
+/* -------------屏幕像素大于300------------- */
+@media (min-width: 300px) 
+{
+    /* 自定义属性 */
+    .navigation u1 li a
+    {
+        /* font-weight: 150; */
+    }
