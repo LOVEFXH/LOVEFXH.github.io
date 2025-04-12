@@ -101,6 +101,8 @@
             cursor: pointer;
             transition: all 0.3s ease;
             box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+            position: relative;
+            overflow: hidden;
         }
         
         .draw-btn:hover {
@@ -108,11 +110,18 @@
             transform: translateY(-2px);
         }
         
+        .draw-btn:disabled {
+            background-color: #ccc;
+            cursor: not-allowed;
+            transform: none;
+        }
+        
         .card-container {
             width: 100%;
             max-width: 600px;
             perspective: 1000px;
             margin-bottom: 30px;
+            position: relative;
         }
         
         .card {
@@ -198,6 +207,11 @@
             color: var(--white);
         }
         
+        .flip-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
         .history {
             width: 100%;
             max-width: 600px;
@@ -270,6 +284,51 @@
             color: #6a1b9a;
         }
         
+        /* 加载动画 */
+        .loading-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            border-radius: 15px;
+            z-index: 10;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+        }
+        
+        .loading-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
+        
+        .loading-spinner {
+            width: 50px;
+            height: 50px;
+            border: 5px solid #f3f3f3;
+            border-top: 5px solid var(--primary-color);
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-bottom: 15px;
+        }
+        
+        .loading-text {
+            color: var(--dark-color);
+            font-size: 1.1rem;
+            font-weight: bold;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
         @media (max-width: 600px) {
             h1 {
                 font-size: 1.8rem;
@@ -303,7 +362,7 @@
 <body>
     <header>
         <h1>💖 情侣卡牌 💖</h1>
-        <p class="subtitle">随机抽取甜蜜任务，增进你们的感情</p>
+        <p class="subtitle">随机抽取甜蜜任务</p>
     </header>
     
     <div class="container">
@@ -319,6 +378,10 @@
         </div>
         
         <div class="card-container">
+            <div class="loading-overlay" id="loadingOverlay">
+                <div class="loading-spinner"></div>
+                <div class="loading-text">正在抽取中...</div>
+            </div>
             <div class="card" id="card">
                 <div class="card-front">
                     <div class="card-category random">随机卡牌</div>
@@ -417,6 +480,7 @@
         const historyList = document.getElementById('historyList');
         const cardCategories = document.querySelectorAll('.card-category');
         const cardNumbers = document.querySelectorAll('.card-number');
+        const loadingOverlay = document.getElementById('loadingOverlay');
 
         // 当前选中的分类
         let currentCategory = 'all';
@@ -430,7 +494,7 @@
             
             // 绑定事件
             flipBtn.addEventListener('click', flipCard);
-            drawBtn.addEventListener('click', drawCard);
+            drawBtn.addEventListener('click', startDrawCard);
             
             // 分类按钮点击事件
             categoryBtns.forEach(btn => {
@@ -445,6 +509,28 @@
         // 翻转卡牌
         function flipCard() {
             card.classList.toggle('flipped');
+        }
+
+        // 开始抽取卡牌（带加载动画）
+        function startDrawCard() {
+            // 禁用按钮防止重复点击
+            drawBtn.disabled = true;
+            flipBtn.disabled = true;
+            
+            // 显示加载动画
+            loadingOverlay.classList.add('active');
+            
+            // 3秒后执行真正的抽取
+            setTimeout(() => {
+                drawCard();
+                
+                // 隐藏加载动画
+                loadingOverlay.classList.remove('active');
+                
+                // 重新启用按钮
+                drawBtn.disabled = false;
+                flipBtn.disabled = false;
+            }, 3000);
         }
 
         // 随机抽取卡牌
