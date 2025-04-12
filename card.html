@@ -1,0 +1,200 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>💖 情侣卡牌 💖</title>
+    <style>
+        body {
+            font-family: 'Microsoft YaHei', sans-serif;
+            background-color: #f5f5f5;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            height: 100vh;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+            background: linear-gradient(135deg, #f7d6db 0%, #f7c4cc 100%);
+        }
+        
+        .container {
+            background-color: white;
+            border-radius: 15px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+            padding: 40px;
+            width: 100%;
+            max-width: 600px;
+            text-align: center;
+            transition: all 0.3s ease;
+        }
+        
+        h1 {
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 28px;
+        }
+        
+        .quote-display {
+            min-height: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin: 30px 0;
+            padding: 20px;
+            background-color: #f9f9f9;
+            border-radius: 10px;
+            border-left: 5px solid #f87286;
+            font-size: 20px;
+            line-height: 1.6;
+            color: #555;
+            transition: all 0.3s ease;
+        }
+        
+        .btn {
+            background-color: #f98293;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            cursor: pointer;
+            border-radius: 50px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .btn:hover {
+            background-color: #dd6476;
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn:active {
+            transform: translateY(0);
+        }
+        
+        
+        .animation {
+            animation: fadeIn 0.5s;
+        }
+        
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        
+        .footer {
+            margin-top: 40px;
+            font-size: 14px;
+            color: #999;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>💖 情侣卡牌 💖</h1>
+        <div class="quote-display" id="quoteDisplay">
+            点击下方按钮抽取
+        </div>
+        <p class="author" id="authorDisplay"></p>
+        <button class="btn" id="generateBtn">获取卡牌</button>
+        <div class="footer">
+            么么叽(づ￣ 3￣)づ
+        </div>
+    </div>
+
+    <script>
+        // 数组
+        const quotes = [
+            { text: "对视挑战：对视10秒，先笑/眨眼的人输。" },
+            { text: "情话接力：轮流说一句土味情话，谁先卡壳就输了。" },
+            { text: "互换身份：模仿对方说话的语气和习惯动作1分钟。" },
+            { text: "甜蜜投喂：互相喂对方吃一口喜欢的零食。" },
+            { text: "手写情书：在纸条上写‘今天最喜欢你的瞬间’，交换阅读。" },
+            { text: "专属暗号：发明一个只有你们懂的手势或密语。" },
+            { text: "同步呼吸：面对面深呼吸3次，感受彼此的节奏。" },
+            { text: "回忆重现：复刻你们第一次约会时的某个细节。" },
+            { text: "未来约定：各自写下‘明年想一起做的事’，封存待兑现。" },
+            { text: "拥抱充电：紧紧拥抱10秒，同时说‘有你真好’。" },
+            { text: "影子合照：在灯光下拍一张创意影子牵手照。" },
+            { text: "模仿表情包：选一个可爱表情包，一起还原并拍照。" },
+            { text: "即兴舞蹈：随机放一首歌，一起跳10秒。" },
+            { text: "背对背问答：同时写下‘对方最喜欢的饮料’，答案一致加分。" },
+            { text: "猜歌挑战：哼一段旋律，让对方猜歌名，猜错学猫叫。" },
+            { text: "动作镜像：一人做动作，另一人同步模仿，30秒不失误。" },
+            { text: "口味测试：蒙眼喂对方3种零食，猜对最多的人赢。" },
+            { text: "电影台词：说一句经典台词，对方5秒内答出片名。" },
+            { text: "灵魂画手：各自画对方的简笔画，猜对才算赢。" },
+            { text: "选择题：同时回答‘更喜欢奶茶还是咖啡？’，看是否一致。"},
+            { text: "时间猜测：闭眼默数30秒，谁更接近实际时间谁赢。" },
+            { text: "表情包大战：用表情包对话3回合，谁先看不懂谁输。" },
+            { text: "未来预测：写下‘明天对方会穿什么颜色’，次日验证。" },
+            { text: "词语接龙：用‘爱’开头，接龙10个词不许重复。" },
+            { text: "盲摸猜物：蒙眼摸对方口袋/包包里的物品，猜对得1分。" },
+            { text: "反向指令：一人说‘举左手’，另一人必须做相反动作。" },
+            { text: "今日夸夸：认真夸赞对方的一个优点+具体例子。" },
+            { text: "按摩特权：为对方按摩肩膀或手部1分钟。" },
+            { text: "心愿便利贴：写下一个小愿望，让对方抽签实现。" },
+            { text: "早安/晚安任务：明天早晨给对方发一句专属问候。" },
+            { text: "感谢纸条：匿名写‘今天谢谢你…’，让对方猜是谁写的。" },
+            { text: "温度检查：问对方‘今天心情几分？’，耐心听TA分享。" },
+            { text: "专属服务：帮对方做一件小事（倒水、整理桌面等）。" },
+            { text: "回忆收藏：各自分享一件‘最珍惜的两人回忆’。" },
+            { text: "未来计划：一起规划下周的某件共同事项。" },
+            { text: "安静陪伴：并肩坐5分钟，不说话，感受彼此存在。" },
+            { text: "天气预报：明早提醒对方天气+穿衣建议。" },
+            { text: "惊喜饮品：给对方泡一杯喜欢的茶/咖啡，不加提醒。" },
+            { text: "睡前故事：给对方讲一个3分钟的短故事（可编可读）。" },
+            { text: "学动物叫：模仿指定动物叫3声，必须惟妙惟肖！" },
+            { text: "表情包五连拍：按要求做5个搞怪表情并拍照留存。" },
+            { text: "倒念台词：把‘我爱你’倒着快速念10遍不许错。" },
+            { text: "土味情话：对路人（或玩偶）大声说一句土味情话。" },
+            { text: "跳舞10秒：随机放音乐即兴扭动10秒。" },
+            { text: "变声说话：用娃娃音/老人音说话30秒。" },
+            { text: "笔帽鼻子：把笔帽顶在鼻尖上坚持20秒不掉。" },
+            { text: "真心话：回答对方一个‘无伤大雅’的尴尬问题。" },
+            { text: "倒写名字：用非惯用手把自己的名字倒着写出来。" },
+            { text: "惩罚券：欠对方一次‘无条件跑腿服务’（如拿外卖）。" },
+            { text: "空气吉他：假装弹吉他并激情演唱10秒。" },
+            { text: "单脚站立：金鸡独立30秒，倒了重来。" },
+            { text: "夸夸大法：用5个夸张的形容词赞美对方。" }
+
+        ];
+
+        const quoteDisplay = document.getElementById('quoteDisplay');
+        const authorDisplay = document.getElementById('authorDisplay');
+        const generateBtn = document.getElementById('generateBtn');
+
+        // 随机获取
+        function getRandomQuote() {
+            const randomIndex = Math.floor(Math.random() * quotes.length);
+            return quotes[randomIndex];
+        }
+
+        // 显示
+        function displayQuote() {
+            // 移除动画类
+            quoteDisplay.classList.remove('animation');
+            authorDisplay.classList.remove('animation');
+            
+            // 强制重绘
+            void quoteDisplay.offsetWidth;
+            void authorDisplay.offsetWidth;
+            
+            const quote = getRandomQuote();
+            quoteDisplay.textContent = quote.text;
+            
+            
+            // 添加动画类
+            quoteDisplay.classList.add('animation');
+            authorDisplay.classList.add('animation');
+        }
+
+        // 点击按钮事件
+        generateBtn.addEventListener('click', displayQuote);
+
+        // 初始加载时显示一条
+        displayQuote();
+    </script>
+</body>
+</html>
