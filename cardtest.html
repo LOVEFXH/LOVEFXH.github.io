@@ -1,0 +1,600 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>情侣卡牌随机抽取</title>
+    <style>
+        :root {
+            --primary-color: #ff6b81;
+            --secondary-color: #ff8e9e;
+            --light-color: #ffebee;
+            --dark-color: #d32f2f;
+            --text-color: #333;
+            --white: #fff;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            font-family: 'Arial', sans-serif;
+        }
+        
+        body {
+            background-color: var(--light-color);
+            color: var(--text-color);
+            line-height: 1.6;
+            padding: 20px;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        
+        h1 {
+            color: var(--dark-color);
+            margin-bottom: 10px;
+            font-size: 2.2rem;
+        }
+        
+        .subtitle {
+            color: var(--primary-color);
+            font-size: 1.1rem;
+            margin-bottom: 20px;
+        }
+        
+        .container {
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+        
+        .controls {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+        
+        .category-selector {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        
+        .category-btn {
+            padding: 8px 15px;
+            border: none;
+            border-radius: 20px;
+            background-color: var(--white);
+            color: var(--dark-color);
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        
+        .category-btn.active {
+            background-color: var(--primary-color);
+            color: var(--white);
+        }
+        
+        .draw-btn {
+            padding: 12px 30px;
+            background-color: var(--dark-color);
+            color: var(--white);
+            border: none;
+            border-radius: 30px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+        }
+        
+        .draw-btn:hover {
+            background-color: var(--primary-color);
+            transform: translateY(-2px);
+        }
+        
+        .card-container {
+            width: 100%;
+            max-width: 600px;
+            perspective: 1000px;
+            margin-bottom: 30px;
+        }
+        
+        .card {
+            width: 100%;
+            min-height: 300px;
+            background-color: var(--white);
+            border-radius: 15px;
+            padding: 30px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            text-align: center;
+        }
+        
+        .card-front, .card-back {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            backface-visibility: hidden;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 30px;
+            border-radius: 15px;
+        }
+        
+        .card-front {
+            background-color: var(--white);
+        }
+        
+        .card-back {
+            background-color: var(--primary-color);
+            color: var(--white);
+            transform: rotateY(180deg);
+        }
+        
+        .card.flipped {
+            transform: rotateY(180deg);
+        }
+        
+        .card-category {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            font-weight: bold;
+        }
+        
+        .card-content {
+            font-size: 1.2rem;
+            margin: 20px 0;
+        }
+        
+        .card-number {
+            position: absolute;
+            bottom: 15px;
+            right: 15px;
+            font-size: 0.9rem;
+            color: rgba(0,0,0,0.5);
+        }
+        
+        .flip-btn {
+            margin-top: 20px;
+            padding: 8px 15px;
+            background-color: transparent;
+            border: 1px solid var(--dark-color);
+            border-radius: 20px;
+            color: var(--dark-color);
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .flip-btn:hover {
+            background-color: var(--dark-color);
+            color: var(--white);
+        }
+        
+        .history {
+            width: 100%;
+            max-width: 600px;
+            margin-top: 30px;
+        }
+        
+        .history h2 {
+            color: var(--dark-color);
+            margin-bottom: 15px;
+            text-align: center;
+        }
+        
+        .history-list {
+            list-style: none;
+        }
+        
+        .history-item {
+            background-color: var(--white);
+            padding: 15px;
+            margin-bottom: 10px;
+            border-radius: 10px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .history-category {
+            padding: 3px 8px;
+            border-radius: 10px;
+            font-size: 0.8rem;
+            font-weight: bold;
+            margin-right: 10px;
+        }
+        
+        .history-content {
+            flex-grow: 1;
+        }
+        
+        .history-date {
+            font-size: 0.8rem;
+            color: rgba(0,0,0,0.5);
+            white-space: nowrap;
+            margin-left: 10px;
+        }
+        
+        /* 分类颜色 */
+        .sweet {
+            background-color: #ffb6c1;
+            color: #d32f2f;
+        }
+        
+        .challenge {
+            background-color: #add8e6;
+            color: #1e88e5;
+        }
+        
+        .care {
+            background-color: #98fb98;
+            color: #2e7d32;
+        }
+        
+        .punish {
+            background-color: #ffd700;
+            color: #ff8f00;
+        }
+        
+        .random {
+            background-color: #d8bfd8;
+            color: #6a1b9a;
+        }
+        
+        @media (max-width: 600px) {
+            h1 {
+                font-size: 1.8rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            .card {
+                min-height: 250px;
+                padding: 20px;
+            }
+            
+            .card-content {
+                font-size: 1rem;
+            }
+            
+            .history-item {
+                flex-direction: column;
+                align-items: flex-start;
+            }
+            
+            .history-date {
+                margin-left: 0;
+                margin-top: 5px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1>💖 情侣卡牌 💖</h1>
+        <p class="subtitle">随机抽取甜蜜任务，增进你们的感情</p>
+    </header>
+    
+    <div class="container">
+        <div class="controls">
+            <div class="category-selector">
+                <button class="category-btn active" data-category="all">全部</button>
+                <button class="category-btn" data-category="sweet">甜蜜互动</button>
+                <button class="category-btn" data-category="challenge">默契挑战</button>
+                <button class="category-btn" data-category="care">暖心关怀</button>
+                <button class="category-btn" data-category="punish">小小惩罚</button>
+            </div>
+            <button class="draw-btn" id="drawBtn">随机抽取</button>
+        </div>
+        
+        <div class="card-container">
+            <div class="card" id="card">
+                <div class="card-front">
+                    <div class="card-category random">随机卡牌</div>
+                    <div class="card-content" id="frontContent">点击"随机抽取"按钮开始游戏</div>
+                    <div class="card-number">0/52</div>
+                </div>
+                <div class="card-back">
+                    <div class="card-category random">随机卡牌</div>
+                    <div class="card-content" id="backContent">任务描述将显示在这里</div>
+                    <div class="card-number">0/52</div>
+                </div>
+            </div>
+            <button class="flip-btn" id="flipBtn">翻转卡牌</button>
+        </div>
+        
+        <div class="history">
+            <h2>历史记录</h2>
+            <ul class="history-list" id="historyList">
+                <li style="text-align: center; color: #999;">暂无历史记录</li>
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        // 卡牌数据
+        const cards = {
+            sweet: [
+                { content: "对视挑战：对视10秒，先笑/眨眼的人输。" },
+                { content: "情话接力：轮流说一句土味情话，谁先卡壳就输了。" },
+                { content: "互换身份：模仿对方说话的语气和习惯动作1分钟。" },
+                { content: "甜蜜投喂：互相喂对方吃一口喜欢的零食。" },
+                { content: "手写情书：在纸条上写'今天最喜欢你的瞬间'，交换阅读。" },
+                { content: "专属暗号：发明一个只有你们懂的手势或密语。" },
+                { content: "同步呼吸：面对面深呼吸3次，感受彼此的节奏。" },
+                { content: "回忆重现：复刻你们第一次约会时的某个细节。" },
+                { content: "未来约定：各自写下明年想一起做的事，封存待兑现。" },
+                { content: "拥抱充电：紧紧拥抱10秒。" },
+                { content: "影子合照：在灯光下拍一张创意影子牵手照。" },
+                { content: "模仿表情包：选一个可爱表情包，一起还原并拍照。" },
+                { content: "即兴舞蹈：随机放一首歌，一起跳10秒。" }
+            ],
+            challenge: [
+                { content: "背对背问答：同时写下对方最喜欢的饮料，答案一致加分。" },
+                { content: "猜歌挑战：哼一段旋律，让对方猜歌名，猜错学猫叫。" },
+                { content: "动作镜像：一人做动作，另一人同步模仿，30秒不失误。" },
+                { content: "口味测试：蒙眼喂对方3种零食，猜对最多的人赢。" },
+                { content: "电影台词：说一句经典台词，对方5秒内答出片名。" },
+                { content: "灵魂画手：各自画对方的简笔画，猜对才算赢。" },
+                { content: "选择题：同时回答更喜欢奶茶还是咖啡？，看是否一致。" },
+                { content: "时间猜测：闭眼默数30秒，谁更接近实际时间谁赢。" },
+                { content: "表情包大战：用表情包对话3回合，谁先看不懂谁输。" },
+                { content: "未来预测：写下明天对方会穿什么颜色，次日验证。" },
+                { content: "词语接龙：用'爱'开头，接龙10个词不许重复。" },
+                { content: "盲摸猜物：蒙眼摸对方口袋/包包里的物品，猜对得1分。" },
+                { content: "反向指令：一人说'举左手'，另一人必须做相反动作。" }
+            ],
+            care: [
+                { content: "今日夸夸：认真夸赞对方的一个优点+具体例子。" },
+                { content: "按摩特权：为对方按摩肩膀或手部1分钟。" },
+                { content: "心愿便利贴：写下一个小愿望，让对方抽签实现。" },
+                { content: "早安/晚安任务：明天早晨给对方发一句专属问候。" },
+                { content: "感谢纸条：匿名写，让对方猜是谁写的。" },
+                { content: "温度检查：问对方今天心情几分？，耐心听TA分享。" },
+                { content: "专属服务：帮对方做一件小事（倒水、整理桌面等）。" },
+                { content: "回忆收藏：各自分享一件最珍惜的两人回忆。" },
+                { content: "未来计划：一起规划下周的某件共同事项。" },
+                { content: "安静陪伴：并肩坐5分钟，不说话，感受彼此存在。" },
+                { content: "天气预报：明早提醒对方天气+穿衣建议。" },
+                { content: "惊喜饮品：给对方泡一杯喜欢的茶/咖啡，不加提醒。" },
+                { content: "睡前故事：给对方讲一个3分钟的短故事（可编可读）。" }
+            ],
+            punish: [
+                { content: "学动物叫：模仿指定动物叫3声，必须惟妙惟肖！" },
+                { content: "表情包五连拍：按要求做5个搞怪表情并拍照留存。" },
+                { content: "倒念台词：把我爱你倒着快速念10遍不许错。" },
+                { content: "土味情话：对路人（或玩偶）大声说一句土味情话。" },
+                { content: "跳舞10秒：随机放音乐即兴扭动10秒。" },
+                { content: "变声说话：用娃娃音/老人音说话30秒。" },
+                { content: "笔帽鼻子：把笔帽顶在鼻尖上坚持20秒不掉。" },
+                { content: "真心话：回答对方一个无伤大雅的尴尬问题。" },
+                { content: "倒写名字：用非惯用手把自己的名字倒着写出来。" },
+                { content: "惩罚券：欠对方一次无条件跑腿服务（如拿外卖）。" },
+                { content: "空气吉他：假装弹吉他并激情演唱10秒。" },
+                { content: "单脚站立：金鸡独立30秒，倒了重来。" },
+                { content: "夸夸大法：用5个夸张的形容词赞美对方。" }
+            ]
+        };
+
+        // 获取DOM元素
+        const card = document.getElementById('card');
+        const flipBtn = document.getElementById('flipBtn');
+        const drawBtn = document.getElementById('drawBtn');
+        const categoryBtns = document.querySelectorAll('.category-btn');
+        const frontContent = document.getElementById('frontContent');
+        const backContent = document.getElementById('backContent');
+        const historyList = document.getElementById('historyList');
+        const cardCategories = document.querySelectorAll('.card-category');
+        const cardNumbers = document.querySelectorAll('.card-number');
+
+        // 当前选中的分类
+        let currentCategory = 'all';
+        // 历史记录
+        let history = JSON.parse(localStorage.getItem('cardHistory')) || [];
+
+        // 初始化页面
+        function init() {
+            // 显示历史记录
+            renderHistory();
+            
+            // 绑定事件
+            flipBtn.addEventListener('click', flipCard);
+            drawBtn.addEventListener('click', drawCard);
+            
+            // 分类按钮点击事件
+            categoryBtns.forEach(btn => {
+                btn.addEventListener('click', () => {
+                    categoryBtns.forEach(b => b.classList.remove('active'));
+                    btn.classList.add('active');
+                    currentCategory = btn.dataset.category;
+                });
+            });
+        }
+
+        // 翻转卡牌
+        function flipCard() {
+            card.classList.toggle('flipped');
+        }
+
+        // 随机抽取卡牌
+        function drawCard() {
+            // 如果卡牌是翻转状态，先翻回来
+            if (card.classList.contains('flipped')) {
+                card.classList.remove('flipped');
+            }
+            
+            // 根据当前选中的分类获取卡牌
+            let availableCards = [];
+            let categoryName = '';
+            let categoryClass = '';
+            
+            if (currentCategory === 'all') {
+                // 合并所有分类的卡牌
+                availableCards = [
+                    ...cards.sweet.map(c => ({...c, category: 'sweet'})),
+                    ...cards.challenge.map(c => ({...c, category: 'challenge'})),
+                    ...cards.care.map(c => ({...c, category: 'care'})),
+                    ...cards.punish.map(c => ({...c, category: 'punish'}))
+                ];
+                categoryName = '随机卡牌';
+                categoryClass = 'random';
+            } else {
+                availableCards = cards[currentCategory].map(c => ({...c, category: currentCategory}));
+                switch(currentCategory) {
+                    case 'sweet':
+                        categoryName = '甜蜜互动';
+                        categoryClass = 'sweet';
+                        break;
+                    case 'challenge':
+                        categoryName = '默契挑战';
+                        categoryClass = 'challenge';
+                        break;
+                    case 'care':
+                        categoryName = '暖心关怀';
+                        categoryClass = 'care';
+                        break;
+                    case 'punish':
+                        categoryName = '小小惩罚';
+                        categoryClass = 'punish';
+                        break;
+                }
+            }
+            
+            // 随机选择一张卡牌
+            const randomIndex = Math.floor(Math.random() * availableCards.length);
+            const selectedCard = availableCards[randomIndex];
+            
+            // 获取卡牌在所有卡牌中的位置
+            const allCards = [
+                ...cards.sweet,
+                ...cards.challenge,
+                ...cards.care,
+                ...cards.punish
+            ];
+            const cardIndex = allCards.findIndex(c => c.content === selectedCard.content) + 1;
+            
+            // 更新卡牌内容
+            frontContent.textContent = selectedCard.content;
+            backContent.textContent = selectedCard.content;
+            
+            // 更新卡牌编号
+            cardNumbers.forEach(el => {
+                el.textContent = `${cardIndex}/52`;
+            });
+            
+            // 更新卡牌类别
+            cardCategories.forEach(el => {
+                // 清除所有类别
+                el.className = 'card-category';
+                // 添加新类别
+                el.classList.add(categoryClass);
+                el.textContent = categoryName;
+            });
+            
+            // 添加到历史记录
+            addToHistory(categoryName, selectedCard.content, categoryClass);
+            
+            // 添加一点动画效果
+            card.style.transform = 'scale(0.95)';
+            setTimeout(() => {
+                card.style.transform = 'scale(1)';
+            }, 100);
+        }
+
+        // 添加到历史记录
+        function addToHistory(category, content, categoryClass) {
+            const now = new Date();
+            const dateStr = `${now.getMonth()+1}/${now.getDate()} ${now.getHours()}:${now.getMinutes().toString().padStart(2, '0')}`;
+            
+            history.unshift({
+                category,
+                content,
+                categoryClass,
+                date: dateStr
+            });
+            
+            // 限制历史记录数量
+            if (history.length > 10) {
+                history = history.slice(0, 10);
+            }
+            
+            // 保存到本地存储
+            localStorage.setItem('cardHistory', JSON.stringify(history));
+            
+            // 更新显示
+            renderHistory();
+        }
+
+        // 渲染历史记录
+        function renderHistory() {
+            historyList.innerHTML = '';
+            
+            if (history.length === 0) {
+                const li = document.createElement('li');
+                li.textContent = '暂无历史记录';
+                li.style.textAlign = 'center';
+                li.style.color = '#999';
+                historyList.appendChild(li);
+                return;
+            }
+            
+            history.forEach(item => {
+                const li = document.createElement('li');
+                li.className = 'history-item';
+                
+                const categorySpan = document.createElement('span');
+                categorySpan.className = `history-category ${item.categoryClass}`;
+                categorySpan.textContent = item.category;
+                
+                const contentSpan = document.createElement('span');
+                contentSpan.className = 'history-content';
+                contentSpan.textContent = item.content;
+                
+                const dateSpan = document.createElement('span');
+                dateSpan.className = 'history-date';
+                dateSpan.textContent = item.date;
+                
+                li.appendChild(categorySpan);
+                li.appendChild(contentSpan);
+                li.appendChild(dateSpan);
+                
+                historyList.appendChild(li);
+            });
+        }
+
+        // 初始化页面
+        init();
+    </script>
+</body>
+</html>
